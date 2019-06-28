@@ -19,15 +19,19 @@ int add_list_head(GenList *list, void *data)
     {
         new->data = malloc(list->data_len);
         if(!new->data)
-            return LIST_STA_MEM_ERR;
+		{
+			free(new);
+			return LIST_STA_MEM_ERR;
+		}
 
         memcpy(new->data,data,list->data_len);
         head->next = new;
         new->prev = head;
         new->next = p;
         p->prev = new;
+		return LIST_STA_OK;
     }
-    return LIST_STA_OK;
+	return LIST_STA_MEM_ERR;
 }
 
 int add_list_tail(GenList *list, void *data)
@@ -40,15 +44,19 @@ int add_list_tail(GenList *list, void *data)
     if(new)
     {
         new->data = malloc(list->data_len);
-        if(!new->data)
-            return LIST_STA_MEM_ERR;
+		if (!new->data)
+		{
+			free(new);
+			return LIST_STA_MEM_ERR;
+		}     
         memcpy(new->data,data,list->data_len);
         p->next = new;
         new->prev = p;
         new->next = head;
         head->prev = new;
+		return LIST_STA_OK;
     }
-    return LIST_STA_OK;
+	return LIST_STA_MEM_ERR;
 }
 
 
@@ -60,7 +68,8 @@ int del_list_head(GenList *list)
 
     if(p == head)
         return LIST_STA_LIST_NULL;
-
+	if (p->data)
+		free(p->data);
     p->prev->next = p->next;
     p->next->prev = p->prev;
     p->prev = NULL;
@@ -79,7 +88,8 @@ int del_list_tail(GenList *list)
 
     if(p == head)
         return LIST_STA_LIST_NULL;
-
+	if(p->data)
+		free(p->data);
     p->prev->next = p->next;
     p->next->prev = p->prev;
     p->prev = NULL;
@@ -114,6 +124,8 @@ int del_list_data(GenList *list, void *data)
     }
     if(match)
     {
+		if (p->data)
+			free(p->data);
         p->prev->next = p->next;
         p->next->prev = p->prev;
         p->prev = NULL;
@@ -127,6 +139,18 @@ int del_list_data(GenList *list, void *data)
         return LIST_STA_MATCH_ERR;
     }
     return LIST_STA_OK;
+}
+
+void del_list_all(GenList *list)
+{
+	if (!list->head) return;
+	while (list->head != list->head->next)
+		del_list_head(list);
+	free(list->head);
+	list->head = NULL;
+	list->data_len = 0;
+	list->matchNode = NULL;
+	list->printNode = NULL;
 }
 
 void* get_list_data_head(GenList list)
@@ -191,5 +215,4 @@ int gen_list_init(GenList *list, int dataLen)
 
     return LIST_STA_OK;
 }
-
 
