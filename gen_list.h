@@ -38,6 +38,8 @@ int del_list_tail(GenList *list);
 
 int del_list_data(GenList *list, void *data);
 
+void del_list_all(GenList *list);
+
 void* get_list_data_head(GenList list);
 
 void* get_list_data_tail(GenList list);
